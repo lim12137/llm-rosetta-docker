@@ -31,6 +31,18 @@ docker-compose up -d
 
 服务将在 `http://localhost:8801` 启动。
 
+默认 `docker-compose.yml` 会直接使用已发布镜像：
+
+```bash
+ghcr.io/lim12137/llm-rosetta-docker:latest
+```
+
+如果你要切换到别的已发布版本，可以在启动前覆盖：
+
+```bash
+LLM_ROSETTA_IMAGE=ghcr.io/lim12137/llm-rosetta-docker:latest docker-compose up -d
+```
+
 ### 4. 在线配置
 
 打开 `http://localhost:8801/admin/`，直接在页面中修改：
@@ -87,6 +99,11 @@ docker-compose logs -f llm-rosetta
 docker-compose down
 ```
 
+说明：
+
+- compose 默认走“已有镜像部署”，不依赖本地 `docker build`
+- 如需替换镜像，可通过环境变量 `LLM_ROSETTA_IMAGE` 覆盖
+
 ### 直接使用 Docker
 
 ```bash
@@ -100,6 +117,8 @@ docker run -d \
   -v $(pwd)/config:/app/config \
   llm-rosetta:latest
 ```
+
+如果你只是部署运行，优先使用已发布镜像而不是本地构建。
 
 ## 🔌 API 使用示例
 

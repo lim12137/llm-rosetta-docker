@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   llm-rosetta:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${LLM_ROSETTA_IMAGE:-ghcr.io/lim12137/llm-rosetta-docker:latest}
     container_name: llm-rosetta-gateway
     restart: unless-stopped
     ports:

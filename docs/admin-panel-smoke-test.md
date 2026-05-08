@@ -8,6 +8,7 @@
 - 暴露并使用内置 `/admin/` 管理面板
 - 让 API URL / API Key 支持在线修改并直接生效
 - 在 GitHub Actions 中补充基础烟测
+- `docker-compose.yml` 默认必须使用已有镜像，而不是本地 build
 
 ## 本次改动后的关键命令
 
