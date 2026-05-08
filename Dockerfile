@@ -10,8 +10,11 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# 安装构建依赖
-RUN --mount=type=cache,target=/root/.cache/pip \
+# 安装构建依赖和 git
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/* && \
+    --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir \
     build \
     wheel
@@ -35,8 +38,8 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PATH="/app/.local/bin:$PATH" \
-    PYTHONPATH="/app:$PYTHONPATH"
+    PYTHONPATH="/app" \
+    PATH="/app/.local/bin:${PATH}"
 
 # 只复制构建的 wheel 文件
 COPY --from=builder /wheels/*.whl /tmp/wheels/
