@@ -5,6 +5,7 @@
 
 # 配置文件（敏感信息）
 config.yaml
+nginx.conf
 
 # 日志
 logs/
