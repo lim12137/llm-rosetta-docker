@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     wheel
 
 # 克隆并构建 LLM-Rosetta
-RUN git clone --depth 1 --branch main https://github.com/Oaklight/llm-rosetta.git /tmp/llm-rosetta && \
+RUN git clone --depth 1 https://github.com/Oaklight/llm-rosetta.git /tmp/llm-rosetta && \
     cd /tmp/llm-rosetta && \
     pip wheel --no-cache-dir --no-deps . -w /wheels && \
     cp -r llm_rosetta /tmp/package/ && \
