@@ -40,6 +40,8 @@ curl --fail http://127.0.0.1:8000/v1/models
   - `/health` 可访问
   - `/admin/` 可访问
   - `/v1/models` 可访问
+- 生产环境可通过 Nginx `Basic Auth` 保护 `/admin/`
+- `deploy` job 已支持 `main` 和 `master`
 
 ## 预期验收标准
 

@@ -41,6 +41,8 @@ docker-compose up -d
 
 修改会写入 `./config/config.jsonc`，按上游管理面板设计可直接生效，无需重启容器。
 
+如果你启用了 `production` profile，建议通过 Nginx 暴露管理面板，此时访问地址是 `http://localhost/admin/`，并会要求 Basic Auth 账号密码。
+
 ## 📋 系统要求
 
 - Docker 20.10+
@@ -59,6 +61,8 @@ docker-compose up -d
 | `ANTHROPIC_API_KEY` | Anthropic API 密钥 | 否 | - |
 | `GOOGLE_API_KEY` | Google GenAI API 密钥 | 否 | - |
 | `GOOGLE_BASE_URL` | Google GenAI API 基础 URL | 否 | `https://generativelanguage.googleapis.com` |
+| `ADMIN_USERNAME` | `/admin/` Basic Auth 用户名 | 生产环境建议配置 | `admin` |
+| `ADMIN_PASSWORD` | `/admin/` Basic Auth 密码 | 生产环境建议配置 | `change-this-password` |
 
 这些环境变量不再作为运行期主配置来源；运行中的真实配置以后续 `/admin/` 保存到 `config/config.jsonc` 的内容为准。
 
@@ -81,6 +85,9 @@ cp config.jsonc.example config/config.jsonc
 # 启动服务
 docker-compose up -d
 
+# 启用带 /admin/ 鉴权的 Nginx 反向代理
+docker-compose --profile production up -d
+
 # 查看日志
 docker-compose logs -f llm-rosetta
 
@@ -101,6 +108,21 @@ docker run -d \
   -v $(pwd)/config:/app/config \
   llm-rosetta:latest
 ```
+
+### 管理面板鉴权
+
+生产环境建议只通过 Nginx 暴露 `/admin/`，并在 `.env` 中设置：
+
+```bash
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-strong-password
+```
+
+启用 `production` profile 后：
+
+- `http://localhost/admin/` 需要 Basic Auth
+- `http://localhost:8000/admin/` 仍是直连网关地址；如果对外暴露，等于绕过鉴权
+- 更稳妥的做法是只对外开放 `80/443`，不要暴露 `8000`
 
 ## 🔌 API 使用示例
 
@@ -150,14 +172,14 @@ curl -X POST http://localhost:8000/v1/chat/completions \
    - 上传到 GitHub Security
 
 3. **自动部署**
-   - 推送到 `main` 分支时触发
+   - 推送到 `main` 或 `master` 分支时触发
    - 可自定义部署逻辑
 
 ### 触发构建
 
 ```bash
 # 推送代码触发构建
-git push origin main
+git push origin master
 
 # 创建标签触发版本发布
 git tag v1.0.0
@@ -204,7 +226,7 @@ security:
 ### 4. 使用反向代理
 
 ```bash
-# 启用 Nginx 反向代理
+# 启用 Nginx 反向代理与 /admin/ Basic Auth
 docker-compose --profile production up -d
 ```
 
