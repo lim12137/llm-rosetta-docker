@@ -14,21 +14,21 @@
 ```bash
 ./scripts/init.sh
 docker compose up -d --build
-curl http://localhost:8000/health
-curl -I http://localhost:8000/admin/
+curl http://localhost:8801/health
+curl -I http://localhost:8801/admin/
 ```
 
 ## GitHub Actions 烟测命令
 
 ```bash
 docker build -t llm-rosetta-gateway:test .
-docker run -d --name llm-rosetta-smoke -p 8000:8000 \
+docker run -d --name llm-rosetta-smoke -p 8801:8000 \
   -v "$PWD/config:/app/config" \
   llm-rosetta-gateway:test
 
-curl --retry 15 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/health
-curl --fail http://127.0.0.1:8000/admin/
-curl --fail http://127.0.0.1:8000/v1/models
+curl --retry 15 --retry-delay 2 --retry-connrefused http://127.0.0.1:8801/health
+curl --fail http://127.0.0.1:8801/admin/
+curl --fail http://127.0.0.1:8801/v1/models
 ```
 
 ## 结果摘要
@@ -44,7 +44,7 @@ curl --fail http://127.0.0.1:8000/v1/models
 
 ## 预期验收标准
 
-- 打开 `http://localhost:8000/admin/` 可进入上游管理面板
+- 打开 `http://localhost:8801/admin/` 可进入上游管理面板
 - 在面板中修改 Provider 的 `Base URL` 与 `API Key` 后无需重启容器
 - 修改内容会写入 `./config/config.jsonc`
 - 容器重启后配置仍保留

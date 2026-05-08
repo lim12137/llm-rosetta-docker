@@ -29,11 +29,11 @@ cp config.jsonc.example config/config.jsonc
 docker-compose up -d
 ```
 
-服务将在 `http://localhost:8000` 启动。
+服务将在 `http://localhost:8801` 启动。
 
 ### 4. 在线配置
 
-打开 `http://localhost:8000/admin/`，直接在页面中修改：
+打开 `http://localhost:8801/admin/`，直接在页面中修改：
 
 - Provider 的 `Base URL`
 - Provider 的 `API Key`
@@ -96,7 +96,7 @@ docker build -t llm-rosetta:latest .
 # 运行容器
 docker run -d \
   --name llm-rosetta \
-  -p 8000:8000 \
+  -p 8801:8000 \
   -v $(pwd)/config:/app/config \
   llm-rosetta:latest
 ```
@@ -106,7 +106,7 @@ docker run -d \
 ### OpenAI 格式 → Anthropic 格式
 
 ```bash
-curl -X POST http://localhost:8000/v1/messages \
+curl -X POST http://localhost:8801/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-provider-target: anthropic" \
   -d '{
@@ -120,7 +120,7 @@ curl -X POST http://localhost:8000/v1/messages \
 ### Anthropic 格式 → OpenAI 格式
 
 ```bash
-curl -X POST http://localhost:8000/v1/chat/completions \
+curl -X POST http://localhost:8801/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "x-provider-target: openai" \
   -d '{
@@ -191,7 +191,7 @@ networks:
 
 ### 3. 启用速率限制
 
-在 `http://localhost:8000/admin/` 中配置：
+在 `http://localhost:8801/admin/` 中配置：
 
 ```yaml
 security:
@@ -218,7 +218,7 @@ ls -la logs/llm-rosetta.log
 ### 健康检查
 
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8801/health
 ```
 
 ### 指标监控
@@ -234,7 +234,7 @@ curl http://localhost:8000/health
 docker-compose logs llm-rosetta
 
 # 检查端口占用
-netstat -tuln | grep 8000
+netstat -tuln | grep 8801
 ```
 
 ### API 请求失败
