@@ -13,8 +13,9 @@ ENV PYTHONUNBUFFERED=1 \
 # 安装构建依赖和 git
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git && \
-    rm -rf /var/lib/apt/lists/* && \
-    --mount=type=cache,target=/root/.cache/pip \
+    rm -rf /var/lib/apt/lists/*
+
+RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir \
     build \
     wheel
