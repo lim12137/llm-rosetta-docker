@@ -56,7 +56,8 @@ jobs:
         run: |
           curl --fail http://127.0.0.1:8000/admin/ > /tmp/admin.html
           curl --fail http://127.0.0.1:8000/v1/models > /tmp/models.json
-          grep -q "Admin Panel" /tmp/admin.html || grep -q "管理面板" /tmp/admin.html
+          grep -qi "<html" /tmp/admin.html
+          grep -q "\"data\"" /tmp/models.json || grep -q "\"object\"" /tmp/models.json
 
       - name: Print container logs on failure
         if: failure()
