@@ -1,6 +1,6 @@
 # LLM-Rosetta 容器化部署方案
 
-基于 [LLM-Rosetta](https://github.com/Oaklight/llm-rosetta) 的生产级容器化部署方案，支持三大协议互转：
+基于 [LLM-Rosetta](https://github.com/Oaklight/llm-rosetta) 网关的容器化部署方案，支持三大协议互转，并直接启用上游内置 `/admin/` 管理面板：
 - **OpenAI Chat Completions**
 - **OpenAI Responses**
 - **Anthropic Messages**
@@ -15,11 +15,12 @@ git clone https://github.com/your-username/llm-rosetta-docker.git
 cd llm-rosetta-docker
 ```
 
-### 2. 配置环境变量
+### 2. 初始化配置
 
 ```bash
 cp .env.example .env
-# 编辑 .env 文件，填入你的 API 密钥
+mkdir -p config
+cp config.jsonc.example config/config.jsonc
 ```
 
 ### 3. 启动服务
@@ -29,6 +30,16 @@ docker-compose up -d
 ```
 
 服务将在 `http://localhost:8000` 启动。
+
+### 4. 在线配置
+
+打开 `http://localhost:8000/admin/`，直接在页面中修改：
+
+- Provider 的 `Base URL`
+- Provider 的 `API Key`
+- 模型到 Provider 的路由关系
+
+修改会写入 `./config/config.jsonc`，按上游管理面板设计可直接生效，无需重启容器。
 
 ## 📋 系统要求
 
@@ -47,17 +58,20 @@ docker-compose up -d
 | `OPENAI_BASE_URL` | OpenAI API 基础 URL | 否 | `https://api.openai.com/v1` |
 | `ANTHROPIC_API_KEY` | Anthropic API 密钥 | 否 | - |
 | `GOOGLE_API_KEY` | Google GenAI API 密钥 | 否 | - |
-| `LOG_LEVEL` | 日志级别 | 否 | `info` |
-| `PORT` | 服务端口 | 否 | `8000` |
+| `GOOGLE_BASE_URL` | Google GenAI API 基础 URL | 否 | `https://generativelanguage.googleapis.com` |
+
+这些环境变量只建议用于首次启动时的默认值预填；运行中的真实配置以后续 `/admin/` 保存到 `config/config.jsonc` 的内容为准。
 
 ### 配置文件
 
-复制 `config.yaml.example` 为 `config.yaml` 并修改：
+复制 `config.jsonc.example` 为 `config/config.jsonc`：
 
 ```bash
-cp config.yaml.example config/config.yaml
-# 编辑 config/config.yaml
+mkdir -p config
+cp config.jsonc.example config/config.jsonc
 ```
+
+该文件是上游网关原生配置文件，管理面板也会直接读写它。
 
 ## 📦 使用方法
 
@@ -84,8 +98,7 @@ docker build -t llm-rosetta:latest .
 docker run -d \
   --name llm-rosetta \
   -p 8000:8000 \
-  -e OPENAI_API_KEY=your-key \
-  -e ANTHROPIC_API_KEY=your-key \
+  -v $(pwd)/config:/app/config \
   llm-rosetta:latest
 ```
 
@@ -179,7 +192,7 @@ networks:
 
 ### 3. 启用速率限制
 
-在 `config.yaml` 中配置：
+在 `http://localhost:8000/admin/` 中配置：
 
 ```yaml
 security:
@@ -218,7 +231,7 @@ curl http://localhost:8000/health
 
 ### 指标监控
 
-LLM-Rosetta 支持 Prometheus 指标导出，可在配置中启用。
+管理面板内置实时指标与请求日志视图。
 
 ## 🛠️ 故障排查
 
@@ -236,10 +249,7 @@ netstat -tuln | grep 8000
 
 ```bash
 # 检查环境变量
-docker-compose exec llm-rosetta env | grep API_KEY
-
-# 检查配置文件
-docker-compose exec llm-rosetta cat /app/config/config.yaml
+docker-compose exec llm-rosetta cat /app/config/config.jsonc
 ```
 
 ### 性能问题

@@ -36,18 +36,18 @@ else
     echo "✅ .env 文件已存在"
 fi
 
-if [ ! -f config/config.yaml ]; then
-    echo "📝 创建 config.yaml 文件..."
-    cp config.yaml.example config/config.yaml
-    echo "⚠️  请编辑 config/config.yaml 文件进行配置"
+if [ ! -f config/config.jsonc ]; then
+    echo "📝 创建 config.jsonc 文件..."
+    cp config.jsonc.example config/config.jsonc
+    echo "⚠️  启动后请访问 /admin/ 在线配置 API URL 和 API Key"
 else
-    echo "✅ config.yaml 文件已存在"
+    echo "✅ config.jsonc 文件已存在"
 fi
 
 # 设置权限
 echo "🔒 设置文件权限..."
 chmod 600 .env 2>/dev/null || true
-chmod 644 config/config.yaml 2>/dev/null || true
+chmod 644 config/config.jsonc 2>/dev/null || true
 chmod 755 config logs ssl 2>/dev/null || true
 
 # 提示用户配置
@@ -58,7 +58,7 @@ echo "==================================="
 echo ""
 echo "下一步操作："
 echo "1. 编辑 .env 文件，填入 API 密钥"
-echo "2. 编辑 config/config.yaml，配置提供商"
+echo "2. 启动服务后访问 /admin/ 在线配置提供商"
 echo "3. 运行部署脚本: ./scripts/deploy.sh"
 echo ""
 echo "快速启动:"

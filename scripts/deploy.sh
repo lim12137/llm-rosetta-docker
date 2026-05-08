@@ -40,24 +40,14 @@ if [ ! -f .env ]; then
     exit 1
 fi
 
-if [ ! -f config/config.yaml ]; then
-    print_error "config/config.yaml 文件不存在，请先运行 ./scripts/init.sh"
+if [ ! -f config/config.jsonc ]; then
+    print_error "config/config.jsonc 文件不存在，请先运行 ./scripts/init.sh"
     exit 1
 fi
 
 print_success "配置文件检查通过"
 
-# 检查 .env 中是否配置了 API 密钥
-source .env
-if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$GOOGLE_API_KEY" ]; then
-    print_warning "未检测到任何 API 密钥配置"
-    print_info "请在 .env 文件中配置至少一个提供商的 API 密钥"
-    read -p "是否继续部署? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-fi
+print_info "API URL 和 Key 可在服务启动后通过 /admin/ 在线修改并立即生效"
 
 # 停止现有容器
 print_info "停止现有容器..."
@@ -100,6 +90,7 @@ echo ""
 echo "服务信息："
 echo "  - 网关地址: http://localhost:8000"
 echo "  - 健康检查: http://localhost:8000/health"
+echo "  - 管理面板: http://localhost:8000/admin/"
 echo ""
 echo "常用命令："
 echo "  查看日志:   docker-compose logs -f llm-rosetta"

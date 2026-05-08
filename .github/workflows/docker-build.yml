@@ -19,8 +19,50 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare config
+        run: |
+          mkdir -p config
+          cp config.jsonc.example config/config.jsonc
+
+      - name: Build test image
+        run: docker build -t llm-rosetta-gateway:test .
+
+      - name: Start container
+        run: |
+          docker run -d --name llm-rosetta-smoke \
+            -p 8000:8000 \
+            -v "$PWD/config:/app/config" \
+            llm-rosetta-gateway:test
+
+      - name: Wait for health
+        run: |
+          curl --retry 20 --retry-delay 2 --retry-connrefused --fail \
+            http://127.0.0.1:8000/health
+
+      - name: Verify admin panel and model endpoint
+        run: |
+          curl --fail http://127.0.0.1:8000/admin/ > /tmp/admin.html
+          curl --fail http://127.0.0.1:8000/v1/models > /tmp/models.json
+          grep -q "Admin Panel" /tmp/admin.html || grep -q "管理面板" /tmp/admin.html
+
+      - name: Print container logs on failure
+        if: failure()
+        run: docker logs llm-rosetta-smoke
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f llm-rosetta-smoke || true
+
   build-and-push:
     runs-on: ubuntu-latest
+    needs: smoke-test
 
     permissions:
       contents: read

@@ -15,7 +15,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 # 安装运行时依赖
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir llm-rosetta
+    pip install --no-cache-dir "llm-rosetta[gateway]"
 
 # 安装系统依赖（curl 用于健康检查）
 RUN apt-get update && \
@@ -35,12 +35,12 @@ RUN mkdir -p /app/config /app/logs /app/cache && \
 
 USER llmrosetta
 
-# 暴露端口（网关模式默认端口）
+# 暴露端口
 EXPOSE 8000
 
 # 健康检查（使用 curl）
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# 启动命令（网关模式）
-CMD ["python", "-m", "llm_rosetta.gateway", "--host", "0.0.0.0", "--port", "8000"]
+# 启动命令
+CMD ["llm-rosetta-gateway", "--config", "/app/config/config.jsonc"]
