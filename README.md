@@ -1,0 +1,290 @@
+# LLM-Rosetta 容器化部署方案
+
+基于 [LLM-Rosetta](https://github.com/Oaklight/llm-rosetta) 的生产级容器化部署方案，支持三大协议互转：
+- **OpenAI Chat Completions**
+- **OpenAI Responses**
+- **Anthropic Messages**
+- **Google GenAI**
+
+## 🚀 快速开始
+
+### 1. 克隆仓库
+
+```bash
+git clone https://github.com/your-username/llm-rosetta-docker.git
+cd llm-rosetta-docker
+```
+
+### 2. 配置环境变量
+
+```bash
+cp .env.example .env
+# 编辑 .env 文件，填入你的 API 密钥
+```
+
+### 3. 启动服务
+
+```bash
+docker-compose up -d
+```
+
+服务将在 `http://localhost:8000` 启动。
+
+## 📋 系统要求
+
+- Docker 20.10+
+- Docker Compose 2.0+
+- 至少 512MB 可用内存
+- 至少 1GB 可用磁盘空间
+
+## 🔧 配置说明
+
+### 环境变量
+
+| 变量名 | 说明 | 必填 | 默认值 |
+|--------|------|------|--------|
+| `OPENAI_API_KEY` | OpenAI API 密钥 | 否 | - |
+| `OPENAI_BASE_URL` | OpenAI API 基础 URL | 否 | `https://api.openai.com/v1` |
+| `ANTHROPIC_API_KEY` | Anthropic API 密钥 | 否 | - |
+| `GOOGLE_API_KEY` | Google GenAI API 密钥 | 否 | - |
+| `LOG_LEVEL` | 日志级别 | 否 | `info` |
+| `PORT` | 服务端口 | 否 | `8000` |
+
+### 配置文件
+
+复制 `config.yaml.example` 为 `config.yaml` 并修改：
+
+```bash
+cp config.yaml.example config/config.yaml
+# 编辑 config/config.yaml
+```
+
+## 📦 使用方法
+
+### 通过 Docker Compose
+
+```bash
+# 启动服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f llm-rosetta
+
+# 停止服务
+docker-compose down
+```
+
+### 直接使用 Docker
+
+```bash
+# 构建镜像
+docker build -t llm-rosetta:latest .
+
+# 运行容器
+docker run -d \
+  --name llm-rosetta \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY=your-key \
+  -e ANTHROPIC_API_KEY=your-key \
+  llm-rosetta:latest
+```
+
+## 🔌 API 使用示例
+
+### OpenAI 格式 → Anthropic 格式
+
+```bash
+curl -X POST http://localhost:8000/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-provider-target: anthropic" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "Hello!"}
+    ]
+  }'
+```
+
+### Anthropic 格式 → OpenAI 格式
+
+```bash
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "x-provider-target: openai" \
+  -d '{
+    "model": "claude-3-5-sonnet-20241022",
+    "max_tokens": 1024,
+    "messages": [
+      {"role": "user", "content": "Hello!"}
+    ]
+  }'
+```
+
+## 🏗️ CI/CD 流程
+
+### GitHub Actions 工作流
+
+项目包含完整的 CI/CD 流程：
+
+1. **构建和推送 Docker 镜像**
+   - 支持多架构（amd64, arm64）
+   - 自动生成标签（版本号、latest）
+   - 推送到 GitHub Container Registry
+
+2. **安全扫描**
+   - 使用 Trivy 扫描漏洞
+   - 生成 SBOM（软件物料清单）
+   - 上传到 GitHub Security
+
+3. **自动部署**
+   - 推送到 `main` 分支时触发
+   - 可自定义部署逻辑
+
+### 触发构建
+
+```bash
+# 推送代码触发构建
+git push origin main
+
+# 创建标签触发版本发布
+git tag v1.0.0
+git push origin v1.0.0
+
+# 手动触发
+# 在 GitHub Actions 页面点击 "Run workflow"
+```
+
+## 🔒 安全最佳实践
+
+### 1. 使用环境变量管理密钥
+
+```bash
+# 不要在配置文件中硬编码密钥
+# 使用 .env 文件（已加入 .gitignore）
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+### 2. 限制网络访问
+
+```yaml
+# docker-compose.yml 中配置
+networks:
+  llm-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+```
+
+### 3. 启用速率限制
+
+在 `config.yaml` 中配置：
+
+```yaml
+security:
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+```
+
+### 4. 使用反向代理
+
+```bash
+# 启用 Nginx 反向代理
+docker-compose --profile production up -d
+```
+
+## 📊 监控和日志
+
+### 查看日志
+
+```bash
+# 实时日志
+docker-compose logs -f llm-rosetta
+
+# 最近 100 行
+docker-compose logs --tail=100 llm-rosetta
+
+# 持久化日志
+ls -la logs/llm-rosetta.log
+```
+
+### 健康检查
+
+```bash
+curl http://localhost:8000/health
+```
+
+### 指标监控
+
+LLM-Rosetta 支持 Prometheus 指标导出，可在配置中启用。
+
+## 🛠️ 故障排查
+
+### 容器无法启动
+
+```bash
+# 查看详细日志
+docker-compose logs llm-rosetta
+
+# 检查端口占用
+netstat -tuln | grep 8000
+```
+
+### API 请求失败
+
+```bash
+# 检查环境变量
+docker-compose exec llm-rosetta env | grep API_KEY
+
+# 检查配置文件
+docker-compose exec llm-rosetta cat /app/config/config.yaml
+```
+
+### 性能问题
+
+```bash
+# 查看资源使用
+docker stats llm-rosetta
+
+# 调整资源限制
+# 编辑 docker-compose.yml 中的 resources 部分
+```
+
+## 📝 开发和测试
+
+### 本地开发
+
+```bash
+# 使用库模式
+python -c "from llm_rosetta import *; print('Ready')"
+
+# 运行测试
+pytest tests/
+```
+
+### 运行测试容器
+
+```bash
+docker-compose run --rm llm-rosetta pytest
+```
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 📄 许可证
+
+MIT License
+
+## 🔗 相关资源
+
+- [LLM-Rosetta 官方文档](https://llm-rosetta.readthedocs.io/)
+- [LLM-Rosetta GitHub 仓库](https://github.com/Oaklight/llm-rosetta)
+- [Docker Hub](https://hub.docker.com/)
+- [GitHub Container Registry](https://ghcr.io/)
+
+## ⚠️ 免责声明
+
+本项目仅供学习和研究使用。使用时请遵守相关 AI 提供商的服务条款。

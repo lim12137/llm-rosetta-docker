@@ -1,0 +1,82 @@
+# LLM-Rosetta 配置示例
+# 复制此文件为 config.yaml 并修改配置
+
+# 网关配置
+gateway:
+  host: "0.0.0.0"
+  port: 8000
+  log_level: "info"  # debug, info, warning, error
+  enable_cors: true
+  allowed_origins: ["*"]
+
+# 上游提供商配置
+providers:
+  openai:
+    enabled: true
+    api_key: "${OPENAI_API_KEY}"
+    base_url: "https://api.openai.com/v1"
+    models:
+      - "gpt-4o"
+      - "gpt-4o-mini"
+      - "o1-preview"
+      - "o1-mini"
+
+  anthropic:
+    enabled: true
+    api_key: "${ANTHROPIC_API_KEY}"
+    base_url: "https://api.anthropic.com"
+    models:
+      - "claude-3-5-sonnet-20241022"
+      - "claude-3-5-haiku-20241022"
+      - "claude-3-opus-20240229"
+
+  google:
+    enabled: false
+    api_key: "${GOOGLE_API_KEY}"
+    base_url: "https://generativelanguage.googleapis.com"
+    models:
+      - "gemini-2.5-flash-preview"
+      - "gemini-2.0-flash-exp"
+
+# 转换规则
+conversion:
+  # 默认输入格式（自动检测）
+  default_input_format: "auto"
+
+  # 默认输出格式
+  default_output_format: "openai_chat"
+
+  # 工具调用配置
+  tool_calling:
+    enabled: true
+    strict_mode: false
+
+  # 流式响应配置
+  streaming:
+    enabled: true
+    chunk_size: 1024
+
+# 安全配置
+security:
+  # API 密钥验证
+  require_auth: false
+  allowed_api_keys: []
+
+  # 速率限制
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+    requests_per_hour: 1000
+
+  # 请求大小限制
+  max_request_size: 10485760  # 10MB
+
+# 日志配置
+logging:
+  level: "info"
+  format: "json"  # json, text
+  file:
+    enabled: true
+    path: "/app/logs/llm-rosetta.log"
+    max_size: 10485760  # 10MB
+    backup_count: 5

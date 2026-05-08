@@ -1,0 +1,82 @@
+# LLM-Rosetta Nginx 反向代理配置示例
+# 复制此文件为 nginx.conf 并修改配置
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream llm_rosetta {
+        server llm-rosetta:8000;
+        keepalive 64;
+    }
+
+    # 限流配置
+    limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        # 日志配置
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log;
+
+        # 客户端上传大小限制
+        client_max_body_size 10M;
+
+        # 请求超时
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+
+        # 健康检查端点
+        location /health {
+            proxy_pass http://llm_rosetta/health;
+            access_log off;
+        }
+
+        # API 端点
+        location /v1/ {
+            # 应用限流
+            limit_req zone=api_limit burst=20 nodelay;
+
+            proxy_pass http://llm_rosetta/v1/;
+            proxy_http_version 1.1;
+
+            # 代理头设置
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # CORS 头
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, x-provider-target' always;
+
+            if ($request_method = 'OPTIONS') {
+                return 204;
+            }
+        }
+
+        # 静态文件服务（如果有 Web UI）
+        location / {
+            root /usr/share/nginx/html;
+            try_files $uri $uri/ /index.html;
+        }
+    }
+
+    # HTTPS 配置（需要 SSL 证书）
+    # server {
+    #     listen 443 ssl http2;
+    #     server_name your-domain.com;
+    #
+    #     ssl_certificate /etc/nginx/ssl/cert.pem;
+    #     ssl_certificate_key /etc/nginx/ssl/key.pem;
+    #     ssl_protocols TLSv1.2 TLSv1.3;
+    #     ssl_ciphers HIGH:!aNULL:!MD5;
+    #
+    #     # ... 其他配置同上
+    # }
+}
