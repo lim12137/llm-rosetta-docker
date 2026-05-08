@@ -33,8 +33,6 @@ RUN mkdir -p /app/config /app/logs /app/cache && \
     useradd -m -u 1000 -s /bin/bash llmrosetta && \
     chown -R llmrosetta:llmrosetta /app
 
-USER llmrosetta
-
 # 暴露端口
 EXPOSE 8000
 
