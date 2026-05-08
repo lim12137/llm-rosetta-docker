@@ -9,15 +9,6 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
-    environment:
-      # 可选：首次启动时可通过 .env 预填默认值，后续以 /admin/ 保存的配置为准
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://api.anthropic.com}
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
-      - GOOGLE_BASE_URL=${GOOGLE_BASE_URL:-https://generativelanguage.googleapis.com}
-
     volumes:
       # 持久化配置、管理面板数据和日志
       - ./config:/app/config

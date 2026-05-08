@@ -60,7 +60,7 @@ docker-compose up -d
 | `GOOGLE_API_KEY` | Google GenAI API 密钥 | 否 | - |
 | `GOOGLE_BASE_URL` | Google GenAI API 基础 URL | 否 | `https://generativelanguage.googleapis.com` |
 
-这些环境变量只建议用于首次启动时的默认值预填；运行中的真实配置以后续 `/admin/` 保存到 `config/config.jsonc` 的内容为准。
+这些环境变量不再作为运行期主配置来源；运行中的真实配置以后续 `/admin/` 保存到 `config/config.jsonc` 的内容为准。
 
 ### 配置文件
 
