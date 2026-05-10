@@ -51,3 +51,5 @@ git diff --check
 - The wrapper entrypoint is now aligned with the upstream logic instead of bypassing it.
 - The only intentional behavior change is the missing-config branch:
   it now copies the baked default config to `/config/config.jsonc` instead of running `llm-rosetta-gateway init`.
+- The baked default config was also aligned with the upstream sample `examples/gateway/config.jsonc`
+  so provider names and model routing match the gateway's expected shape.
