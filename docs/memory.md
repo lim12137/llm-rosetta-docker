@@ -1,8 +1,10 @@
-# 项目记忆
+# Project Memory
 
-## 2026-05-09
+## 2026-05-11
 
-- 当前项目的 `docker-compose.yml` 必须采用“已有镜像部署”模式，不能把本地 `build` 作为默认方案
-- compose 默认镜像基线应指向已发布镜像，推荐使用 `ghcr.io/lim12137/llm-rosetta-docker:latest`
-- 对外默认访问端口使用 `8801`
-- 上游 `/admin/` 管理面板已接入，运行期配置以 `config/config.jsonc` 为准
+- Default deployment path must use a published image in `docker-compose.yml`, not a local `build`.
+- The published image is a thin wrapper around `oaklight/llm-rosetta-gateway:latest`.
+- The wrapper image must seed `/config/config.jsonc` from a baked default when the runtime config file is missing.
+- The default compose deployment must persist that seeded config to host `./config/config.jsonc`.
+- Default public access is `http://127.0.0.1:8765/admin/`.
+- A pre-created host-side `config.jsonc` is optional; external override is a supported advanced path.

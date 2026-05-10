@@ -1,0 +1,4 @@
+services:
+  llm-rosetta:
+    volumes:
+      - ./config/config.jsonc:/config/config.jsonc

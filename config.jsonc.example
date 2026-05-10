@@ -1,21 +1,22 @@
 {
-  // LLM-Rosetta Gateway configuration
-  // This file is persisted under ./config/config.jsonc and can be edited live in /admin/.
+  // Default config baked into the image.
+  // On first container start, the entrypoint seeds this file to /config/config.jsonc
+  // when no external config is mounted.
   "providers": {
     "openai-default": {
       "type": "openai_chat",
-      "api_key": "",
-      "base_url": "https://api.openai.com/v1"
+      "api_key": "${OPENAI_API_KEY}",
+      "base_url": "${OPENAI_BASE_URL}"
     },
     "anthropic-default": {
       "type": "anthropic",
-      "api_key": "",
-      "base_url": "https://api.anthropic.com"
+      "api_key": "${ANTHROPIC_API_KEY}",
+      "base_url": "${ANTHROPIC_BASE_URL}"
     },
     "google-default": {
       "type": "google",
-      "api_key": "",
-      "base_url": "https://generativelanguage.googleapis.com"
+      "api_key": "${GOOGLE_API_KEY}",
+      "base_url": "${GOOGLE_BASE_URL}"
     }
   },
   "models": {
@@ -26,6 +27,6 @@
   },
   "server": {
     "host": "0.0.0.0",
-    "port": 8000
+    "port": 8765
   }
 }

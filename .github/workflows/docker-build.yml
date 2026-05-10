@@ -7,7 +7,7 @@ on:
       - master
       - develop
     tags:
-      - 'v*'
+      - "v*"
   pull_request:
     branches:
       - main
@@ -26,10 +26,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare config
-        run: |
-          mkdir -p config
-          cp config.jsonc.example config/config.jsonc
+      - name: Prepare host config directory
+        run: mkdir -p config
 
       - name: Build test image
         run: docker build -t llm-rosetta-gateway:test .
@@ -37,14 +35,14 @@ jobs:
       - name: Start container
         run: |
           docker run -d --name llm-rosetta-smoke \
-            -p 8000:8000 \
-            -v "$PWD/config:/app/config" \
+            -p 8765:8765 \
+            -v "$PWD/config:/config" \
             llm-rosetta-gateway:test
 
       - name: Wait for health
         run: |
           for i in $(seq 1 30); do
-            if curl --silent --show-error --fail http://127.0.0.1:8000/health; then
+            if curl --silent --show-error --fail http://127.0.0.1:8765/health; then
               exit 0
             fi
             sleep 2
@@ -52,10 +50,13 @@ jobs:
           docker logs llm-rosetta-smoke
           exit 1
 
+      - name: Verify seeded host config
+        run: test -f config/config.jsonc
+
       - name: Verify admin panel and model endpoint
         run: |
-          curl --fail http://127.0.0.1:8000/admin/ > /tmp/admin.html
-          curl --fail http://127.0.0.1:8000/v1/models > /tmp/models.json
+          curl --fail http://127.0.0.1:8765/admin/ > /tmp/admin.html
+          curl --fail http://127.0.0.1:8765/v1/models > /tmp/models.json
           grep -qi "<html" /tmp/admin.html
           grep -q "\"data\"" /tmp/models.json || grep -q "\"object\"" /tmp/models.json
 
@@ -146,13 +147,13 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          format: sarif
+          output: trivy-results.sarif
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: trivy-results.sarif
 
   deploy:
     runs-on: ubuntu-latest
@@ -163,10 +164,5 @@ jobs:
       - name: Deploy to production
         run: |
           echo "Deploying to production..."
-          # 这里添加你的部署逻辑，例如：
-          # - SSH 到服务器并拉取最新镜像
-          # - 使用 docker-compose 重新部署
-          # - 触发 Kubernetes 滚动更新等
-
           echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           echo "Deployment complete!"
