@@ -15,4 +15,19 @@ else
   echo "Using host-provided config at ${CONFIG_PATH}."
 fi
 
-exec llm-rosetta-gateway --config "${CONFIG_PATH}" "$@"
+if [ "$#" -gt 0 ] && [ "$1" = "llm-rosetta-gateway" ]; then
+  shift
+fi
+
+if [ "$#" -eq 0 ]; then
+  exec llm-rosetta-gateway --config "${CONFIG_PATH}"
+fi
+
+case "$1" in
+  -*)
+    exec llm-rosetta-gateway --config "${CONFIG_PATH}" "$@"
+    ;;
+  *)
+    exec "$@"
+    ;;
+esac

@@ -35,3 +35,9 @@ git diff --check
 - First boot is designed to materialize `./config/config.jsonc` on the host
 - External config override remains available with a dedicated example file
 - Local container runtime validation was not executed in this session because the Docker Desktop Linux engine was unavailable on this machine
+
+## Follow-up fix for failed GitHub Actions smoke test
+
+- The wrapper entrypoint originally appended `llm-rosetta-gateway` unconditionally.
+- The upstream base image likely already provides a default `CMD`, which caused the wrapper to pass a duplicated command into the final process.
+- The entrypoint was updated to strip a leading inherited `llm-rosetta-gateway`, run the gateway with `--config` when no explicit command is supplied, and preserve custom commands when users override the container command.
