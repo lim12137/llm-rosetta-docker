@@ -41,3 +41,5 @@ git diff --check
 - The wrapper entrypoint originally appended `llm-rosetta-gateway` unconditionally.
 - The upstream base image likely already provides a default `CMD`, which caused the wrapper to pass a duplicated command into the final process.
 - The entrypoint was updated to strip a leading inherited `llm-rosetta-gateway`, run the gateway with `--config` when no explicit command is supplied, and preserve custom commands when users override the container command.
+- A second likely failure source is write permission on the bind-mounted host `./config` directory.
+- The wrapper image now switches to `USER root` before seeding `/config/config.jsonc`, so first-boot persistence to the host path is not blocked by upstream rootless defaults.
