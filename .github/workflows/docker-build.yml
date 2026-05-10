@@ -39,6 +39,12 @@ jobs:
             -v "$PWD/config:/config" \
             llm-rosetta-gateway:test
 
+      - name: Print container diagnostics
+        run: |
+          docker ps -a
+          docker inspect llm-rosetta-smoke
+          docker logs llm-rosetta-smoke || true
+
       - name: Wait for health
         run: |
           for i in $(seq 1 30); do

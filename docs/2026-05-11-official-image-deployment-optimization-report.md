@@ -53,3 +53,6 @@ git diff --check
   it now copies the baked default config to `/config/config.jsonc` instead of running `llm-rosetta-gateway init`.
 - The baked default config was also aligned with the upstream sample `examples/gateway/config.jsonc`
   so provider names and model routing match the gateway's expected shape.
+- Because public GitHub API access cannot download workflow logs for this repository without admin rights,
+  the smoke-test workflow was updated to print `docker ps`, `docker inspect`, and `docker logs`
+  immediately after container startup to make the next failure self-diagnosing.
