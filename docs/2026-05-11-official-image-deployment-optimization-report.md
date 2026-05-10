@@ -43,3 +43,11 @@ git diff --check
 - The entrypoint was updated to strip a leading inherited `llm-rosetta-gateway`, run the gateway with `--config` when no explicit command is supplied, and preserve custom commands when users override the container command.
 - A second likely failure source is write permission on the bind-mounted host `./config` directory.
 - The wrapper image now switches to `USER root` before seeding `/config/config.jsonc`, so first-boot persistence to the host path is not blocked by upstream rootless defaults.
+
+## Follow-up fix after reading upstream Docker source
+
+- The upstream image already ships a custom `/entrypoint.sh`.
+- That entrypoint normalizes `PUID/PGID`, fixes `/config` ownership, and starts the gateway through `su-exec`.
+- The wrapper entrypoint is now aligned with the upstream logic instead of bypassing it.
+- The only intentional behavior change is the missing-config branch:
+  it now copies the baked default config to `/config/config.jsonc` instead of running `llm-rosetta-gateway init`.

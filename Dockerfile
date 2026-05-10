@@ -2,8 +2,6 @@ FROM oaklight/llm-rosetta-gateway:latest
 
 WORKDIR /app
 
-USER root
-
 COPY config.jsonc.example /defaults/config.jsonc
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
